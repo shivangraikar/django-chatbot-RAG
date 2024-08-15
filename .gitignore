@@ -1,0 +1,34 @@
+# Python bytecode files
+__pycache__/
+*.py[cod]
+
+# Environment variables and secrets
+.env
+
+# Django-specific
+db.sqlite3
+media/
+staticfiles/
+*.log
+
+# Virtual environment
+venv/
+myenv/
+.env/
+*.dylib
+
+# PyCharm and other IDE files
+.idea/
+.vscode/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Miscellaneous
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.exe
+*.dll

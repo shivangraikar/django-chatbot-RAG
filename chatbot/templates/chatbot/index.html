@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <title>Chatbot</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'chatbot/style.css' %}"> <!-- Correct path for Django static files -->
+</head>
+<body>
+    <div id="chat-container">
+        <div id="messages"></div>
+        <div id="input-container">
+            <input type="text" id="user-message" placeholder="Type your message..." required />
+            <button type="button" id="send-button">Send</button>
+        </div>
+        <!-- PDF Upload Form -->
+    <div id="pdf-upload-container">
+        <form id="pdf-upload-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Upload PDF</button>
+        </form>
+    </div>
+    </div>
+    
+    <script>
+        document.getElementById('send-button').addEventListener('click', function() {
+            const userMessage = document.getElementById('user-message').value;
+
+            // Add user message to chatbox
+            const messagesContainer = document.getElementById('messages');
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user-message';
+            userMessageDiv.textContent = 'You: ' + userMessage;
+            messagesContainer.appendChild(userMessageDiv);
+
+            // Send user message to server
+            fetch('/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ user_message: userMessage })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Add bot response to chatbox
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.className = 'message bot-message';
+                botMessageDiv.innerHTML = marked.parse('Bot: ' + data.response); // Convert markdown to HTML
+                messagesContainer.appendChild(botMessageDiv);
+
+                // Clear the input
+                document.getElementById('user-message').value = '';
+
+                // Scroll to the bottom of the chatbox
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+    <script src="{% static 'chatbot/script.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</body>
+</html>
